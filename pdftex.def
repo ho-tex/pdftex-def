@@ -1,4 +1,4 @@
-\ProvidesFile{pdftex.def}[2016/01/23 v0.06e Graphics/color for pdfTeX]
+\ProvidesFile{pdftex.def}[2016/06/04 v0.06f Graphics/color for pdfTeX]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %% LaTeX Colour and Graphics support for PDFTeX
@@ -261,6 +261,8 @@
 %  * Fix for v0.06a, package `ltxcmds' was not loaded in plain TeX.
 % 2016/01/23 v0.6e (DPC)
 %  * Move EPS handler here from graphics.cfg
+% 2016/06/04 v0.6f (DPC)
+%  * support graphcs/color option (no)setpagesize
 %
 % Prefix of internal commands for this file `pdftex.def':
 %   \GPT@ (Graphics bundle PdfTex driver)
@@ -439,7 +441,9 @@
   \pdfoutput=1 %
 \fi
 
-\ltx@IfUndefined{stockwidth}{%
+\ifGin@setpagesize
+  \AtBeginDocument{%
+  \ltx@IfUndefined{stockwidth}{%
   \ltx@IfUndefined{paperwidth}{%
   }{%
     \ifdim\paperwidth>0pt\relax
@@ -456,7 +460,9 @@
       \pdfpageheight=\stockheight
     \fi
   \fi
+}%
 }
+\fi
 
 % Colour Support. The following models may be used.
 %   * cmyk   supported directly.
@@ -1817,7 +1823,7 @@ E     \else
   % * \InputIfFileExists has problems with parameters (#1).
   % * Implementation of \providecommand is insufficient in miniltx.tex
   \ltx@ifundefined{convertMPtoPDF}{%
-    \newcommand*{\convertMPtoPDF}[3]{%
+    \newcommand{\convertMPtoPDF}[3]{%
       \GPT@error{%
         Cannot convert ##1 from MPS to PDF.\MessageBreak
         The support file `supp-pdf.mkii' (supp-pdf.tex) is missing%
@@ -1917,6 +1923,7 @@ E     \else
   \else
     \AtEndOfPackage{%
       \AtBeginDocument{%
+        \ifx\includegraphics\@undefined\else
         \@ifpackageloaded{pst-pdf}{}{%
           \@ifpackageloaded{pdftricks}{}{%
             \RequirePackage{pdftexcmds}[2007/11/11]%
@@ -1929,6 +1936,7 @@ E     \else
             \fi
           }% pdftricks not loaded
         }% pst-pdf not loaded
+	\fi
       }% AtBeginDocument block
     }% AtEndofPackage block
   \fi % AtEndofPackage not defined
