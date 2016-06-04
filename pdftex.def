@@ -1,4 +1,4 @@
-\ProvidesFile{pdftex.def}[2011/05/27 v0.06d Graphics/color for pdfTeX]
+\ProvidesFile{pdftex.def}[2016/01/23 v0.06e Graphics/color for pdfTeX]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %% LaTeX Colour and Graphics support for PDFTeX
@@ -6,8 +6,11 @@
 %% License
 %% =======
 %%
-%% Copyright (C) 2000-2011 David Carlisle, Sebastian Rahtz, Hans Hagen,
+%% Copyright (C) 2000-2015 
+%% David Carlisle, Sebastian Rahtz, Hans Hagen,
 %% Heiko Oberdiek and Martin Schr\"oder
+%% 2016 Oberdiek Package Suport Group
+%%      https://github.com/ho-tex/pdftex-def/issues
 %%
 %% This work may be distributed and/or modified under the
 %% conditions of the LaTeX Project Public License, either version 1.3c
@@ -19,8 +22,8 @@
 %%
 %% This work has the LPPL maintenance status `maintained'.
 %%
-%% The Current Maintainer of this work is
-%% Heiko Oberdiek and Martin Schr\"oder.
+%% The Current Maintainers of this work are
+%% LaTeX3 project and Heiko Oberdiek
 %%
 %% This work consists of the file pdftex.def.
 %%
@@ -256,6 +259,8 @@
 %    available. This fixes a compatibilty issue with class `combine'.
 % 2011/05/27 v0.06d (HO)
 %  * Fix for v0.06a, package `ltxcmds' was not loaded in plain TeX.
+% 2016/01/23 v0.6e (DPC)
+%  * Move EPS handler here from graphics.cfg
 %
 % Prefix of internal commands for this file `pdftex.def':
 %   \GPT@ (Graphics bundle PdfTex driver)
@@ -1547,7 +1552,8 @@ E     \else
         \ifnum\pdfminorversion>3 %
           \def\Gin@extensions{%
             .png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,%
-            .PNG,.PDF,.JPG,.JPEG,.JBIG2,.JB2%
+            .PNG,.PDF,.JPG,.JPEG,.JBIG2,.JB2,%
+	    .eps
           }%
         \fi
         \@namedef{Gin@rule@.jb2}#1{{jbig2}{.jb2}{#1}}%
@@ -1563,7 +1569,7 @@ E     \else
 \@namedef{Gin@rule@.mps}#1{{mps}{.mps}{#1}}
 \@namedef{Gin@rule@.pdf}#1{{pdf}{.pdf}{#1}}
 \@namedef{Gin@rule@.PDF}#1{{pdf}{.PDF}{#1}}
-
+\@namedef{Gin@rule@.eps}#1{{eps}{.eps}{#1}}
 
 % Rotation
 % slightly hacky, but set width of box 0 to 0pt otherwise
@@ -1884,14 +1890,47 @@ E     \else
   \@onlypreamble\LoadMetaPostSpecialExtensions
 }
 
-% these seem to upset pdftex. ignore them. SPQR 1999/08/02
-% allow for plain graphics, not graphicx.
-% pdftex.def is loaded before the definition in graphicx,
-% so do all the stuff \AtBeginDocument:
-\AtBeginDocument{%
-  \ltx@IfUndefined{define@key}{}{%
-    \define@key{Gin}{natwidth}{}%
-    \define@key{Gin}{natheight}{}%
-  }%
-}%
+% Load package epstopdf if
+% a) LaTeX is running (plain TeX users are on their own),
+% b) and shell escape (\write18) is enabled (possibly restricted),
+% c) and \DoNotLoadEpstopdf either does not exist or is not \relax,
+% d) and neither pst-pdf nor pdftricks is loaded (by \begin{document}).
+% 
+% In other words, by default .eps files will be automatically
+% converted to .pdf files when outputting pdf.  This can be wrong!
+% If the .pdf is the source, rather than the .eps, you should put
+%  \newcommand{\DoNotLoadEpstopdf}{}
+% before even the \documentclass line of your document.
+% 
+% More information about the epstopdf run will be in the .log file;
+% see http://ctan.org/pkg/epstopdf-pkg for more info about the
+% epstopdf package itself.  In turn, it calls the epstopdf script
+% (http://ctan.org/pkg/epstopdf).
+% 
+% For the first discussion and background on this, see the thread on latex-l:
+% http://thread.gmane.org/gmane.comp.tex.latex.latex3/1465
+%
+\begingroup\expandafter\expandafter\expandafter\endgroup
+\expandafter\ifx\csname DoNotLoadEpstopdf\endcsname\relax
+  \begingroup\expandafter\expandafter\expandafter\endgroup
+  \expandafter\ifx\csname AtEndOfPackage\endcsname\relax
+  \else
+    \AtEndOfPackage{%
+      \AtBeginDocument{%
+        \@ifpackageloaded{pst-pdf}{}{%
+          \@ifpackageloaded{pdftricks}{}{%
+            \RequirePackage{pdftexcmds}[2007/11/11]%
+            \expandafter\ifx\csname pdf@shellescape\endcsname\relax
+            \else
+	      \@ifpackageloaded{graphics}{
+              \ifnum\pdf@shellescape>0 %
+                \RequirePackage{epstopdf-base}[2009/07/12]%
+              \fi}{}
+            \fi
+          }% pdftricks not loaded
+        }% pst-pdf not loaded
+      }% AtBeginDocument block
+    }% AtEndofPackage block
+  \fi % AtEndofPackage not defined
+\fi % DoNotLoadEpstopdf not defined
 \GPT@AtEnd
