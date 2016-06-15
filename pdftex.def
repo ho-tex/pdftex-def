@@ -1,4 +1,4 @@
-\ProvidesFile{pdftex.def}[2016/06/04 v0.06f Graphics/color for pdfTeX]
+\ProvidesFile{pdftex.def}[2016/06/15 v0.06g Graphics/color for pdfTeX]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %% LaTeX Colour and Graphics support for PDFTeX
@@ -1559,7 +1559,7 @@ E     \else
           \def\Gin@extensions{%
             .png,.pdf,.jpg,.mps,.jpeg,.jbig2,.jb2,%
             .PNG,.PDF,.JPG,.JPEG,.JBIG2,.JB2,%
-	    .eps
+	    .eps%
           }%
         \fi
         \@namedef{Gin@rule@.jb2}#1{{jbig2}{.jb2}{#1}}%
