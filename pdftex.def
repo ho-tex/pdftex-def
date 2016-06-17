@@ -1,4 +1,4 @@
-\ProvidesFile{pdftex.def}[2016/06/15 v0.06g Graphics/color for pdfTeX]
+\ProvidesFile{pdftex.def}[2016/06/17 v0.06h Graphics/color for pdfTeX]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %% LaTeX Colour and Graphics support for PDFTeX
@@ -263,6 +263,10 @@
 %  * Move EPS handler here from graphics.cfg
 % 2016/06/04 v0.6f (DPC)
 %  * support graphcs/color option (no)setpagesize
+% 2016/06/15 v0.6g (DPC)
+%  * typo
+% 2016/06/17 v0.6h (DPC)
+%  * guards for contributed packages and plain TeX
 %
 % Prefix of internal commands for this file `pdftex.def':
 %   \GPT@ (Graphics bundle PdfTex driver)
@@ -440,9 +444,13 @@
   }\@ehc
   \pdfoutput=1 %
 \fi
-
+\@ifundefined{ifGin@setpagesize}
+  {\expandafter\let\csname ifGin@setpagesize\expandafter\endcsname
+                    \csname iftrue\endcsname}
+  {}
 \ifGin@setpagesize
-  \AtBeginDocument{%
+\ifx\paperwidth\@undefined\else
+\AtBeginDocument{%
   \ltx@IfUndefined{stockwidth}{%
   \ltx@IfUndefined{paperwidth}{%
   }{%
@@ -462,6 +470,7 @@
   \fi
 }%
 }
+\fi
 \fi
 
 % Colour Support. The following models may be used.
