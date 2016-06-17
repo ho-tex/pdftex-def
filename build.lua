@@ -12,7 +12,7 @@ sourcefiles  = {"pdftex.def"}
 typesetfiles = {}
 
 -- TDS info (not required at present)
-tdsroot = "pdftex"
+tdsroot = "latex"
 
 -- No automated tests for this bundle
 testfildir = ""
